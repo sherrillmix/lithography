@@ -1,12 +1,12 @@
-plotLith<-function(file='lith.pdf',width=1,height=3,buffer=.15,holeDiameter=.2,nLine=100,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3){
+plotLith<-function(file='lith.pdf',width=1,height=1,buffer=.05,holeDiameter=.1,nLine=70,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3){
   mi2in<-3.93701e-5
   mainLwdIn<-mainLwd*mi2in
   constrictWidthIn<-constrictWidth*mi2in
   pdf(file,width=width,height=height)
   par(mar=c(0,0,0,0))
-  plot(1,1,type='n',xlab='',ylab='',ylim=c(0,height),xlim=c(0,width),bty='n',xaxt='n',yaxt='n')
-  topHole<-c(width/2,height-buffer)
-  bottomHole<-c(width/2,buffer)
+  plot(1,1,type='n',xlab='',ylab='',ylim=c(0,height),xlim=c(0,width),bty='n',xaxt='n',yaxt='n',xaxs='i',yaxs='i')
+  topHole<-c(width/2,height-buffer-holeDiameter/2)
+  bottomHole<-c(width/2,buffer+holeDiameter/2)
   #pointCex<-holeDiameter/(par('cin')[2]*.75)
   #replace with circle
   #points(c(topHole[1],bottomHole[1]),c(topHole[2],bottomHole[2]),pch=21,bg='#000000',cex=pointCex)
@@ -15,8 +15,8 @@ plotLith<-function(file='lith.pdf',width=1,height=3,buffer=.15,holeDiameter=.2,n
   plotrix::draw.circle(bottomHole[1],bottomHole[2],radius=holeDiameter/2,col='black')
   linePos<-seq(buffer,width-buffer,length.out=nLine)
   circlePos<-seq(topHole[1]-holeDiameter/2.1,topHole[1]+holeDiameter/2.1,length.out=nLine)
-  lineTop<-(height-buffer*.2)*.8
-  lineBottom<-(height-buffer*2)*.2
+  lineTop<-buffer+(height-buffer*2)*.8
+  lineBottom<-buffer+(height-buffer*2)*.2
   lineMid<-(lineTop+lineBottom)/2
   constrictBottom<-lineMid-(constrictLength+constrictRamp*2)*mi2in
   topRampBottom<-lineMid-constrictRamp*mi2in
@@ -36,10 +36,12 @@ plotLith<-function(file='lith.pdf',width=1,height=3,buffer=.15,holeDiameter=.2,n
   polyDf<-do.call(rbind,lapply(linePos,function(xx)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,xx+constrictWidthIn/2,xx-constrictWidthIn/2,NA),'y'=c(lineMid,lineMid,topRampBottom,topRampBottom,NA))))
   polygon(polyDf$x,polyDf$y,col='black',border=NA)
   #
-  polyDf<-do.call(rbind,mapply(function(xx,yy)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,yy+mainLwdIn/2,yy-mainLwdIn/2,NA),'y'=c(lineTop,lineTop,topHole[2],topHole[2],NA)),linePos,circlePos,SIMPLIFY=FALSE))
+  #polyDf<-do.call(rbind,mapply(function(xx,yy)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,yy+mainLwdIn/2,yy-mainLwdIn/2,NA),'y'=c(lineTop,lineTop,topHole[2],topHole[2],NA)),linePos,circlePos,SIMPLIFY=FALSE))
+  polyDf<-do.call(rbind,lapply(linePos,function(xx)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,topHole[1]+mainLwdIn/2,topHole[1]-mainLwdIn/2,NA),'y'=c(lineTop,lineTop,topHole[2]+holeDiameter/2.1,topHole[2]+holeDiameter/2.1,NA))))
   polygon(polyDf$x,polyDf$y,col='black',border=NA)
   #
-  polyDf<-do.call(rbind,mapply(function(xx,yy)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,yy+mainLwdIn/2,yy-mainLwdIn/2,NA),'y'=c(lineBottom,lineBottom,bottomHole[2],bottomHole[2],NA)),linePos,circlePos,SIMPLIFY=FALSE))
+  #polyDf<-do.call(rbind,mapply(function(xx,yy)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,yy+mainLwdIn/2,yy-mainLwdIn/2,NA),'y'=c(lineBottom,lineBottom,bottomHole[2],bottomHole[2],NA)),linePos,circlePos,SIMPLIFY=FALSE))
+  polyDf<-do.call(rbind,lapply(linePos,function(xx)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,bottomHole[1]+mainLwdIn/2,bottomHole[1]-mainLwdIn/2,NA),'y'=c(lineBottom,lineBottom,bottomHole[2]-holeDiameter/2.1,bottomHole[2]-holeDiameter/2.1,NA))))
   polygon(polyDf$x,polyDf$y,col='black',border=NA)
   #segments(bottomHole[1],bottomHole[2]-holeDiameter/2.1,linePos,lineBottom,lwd=mainLwd*3.93701e-5/96)
   #segments(topHole[1],topHole[2]+holeDiameter/2.1,linePos,lineTop,lwd=mainLwd*3.93701e-5/96)
