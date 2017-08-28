@@ -58,4 +58,5 @@ plotLith<-function(file='lith.pdf',width=1,height=1,buffer=.05,holeDiameter=.1,n
     polygon(c(bottomHole[1],max(linePos)+mainLwdIn/2,min(linePos)-mainLwdIn/2),c(bottomHole[2]-holeDiameter/2,lineBottom,lineBottom),col='black',border=NA)
   dev.off()
 }
+#open in inkscape and save with base unit px
 plotLith()
