@@ -1,10 +1,10 @@
-plotLith<-function(file='lith.pdf',width=1,height=2,buffer=.05,holeDiameter=.1,nLine=70,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3){
+plotLith<-function(file='lith.pdf',width=1,height=1,buffer=.05,holeDiameter=.1,nLine=70,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3){
   #convert microns to inches
   mi2in<-3.93701e-5
   mainLwdIn<-mainLwd*mi2in
   constrictWidthIn<-constrictWidth*mi2in
   #cairo_pdf to avoid resolution issues
-  cairo_pdf(file,width=width,height=height)
+  cairo_pdf(file,width=width/mi2in/90,height=height/mi2in/90)
     #no margins
     par(mar=c(0,0,0,0))
     #empty plot
@@ -38,22 +38,24 @@ plotLith<-function(file='lith.pdf',width=1,height=2,buffer=.05,holeDiameter=.1,n
     polyDf<-do.call(rbind,lapply(linePos,function(xx)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,xx+constrictWidthIn/2,xx-constrictWidthIn/2,NA),'y'=c(lineMid,lineMid,topRampBottom,topRampBottom,NA))))
     polygon(polyDf$x,polyDf$y,col='black',border=NA)
     #top connectors
-    polyDf<-do.call(rbind,lapply(linePos,function(xx){
-        slope<-c(xx-mainLwdIn/2-topHole[1]+mainLwdIn/2,lineTop-topHole[2]+holeDiameter/2.1)
-        perp<-rev(slope)*c(1,-1)
-        offset<--perp/sqrt(sum(perp^2))*mainLwdIn
-        data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,topHole[1]+offset[1],topHole[1]+mainLwdIn/2,NA),'y'=c(lineTop,lineTop,topHole[2]+holeDiameter/2.1+offset[2],topHole[2]+holeDiameter/2.1,NA))
-    }))
-    polygon(polyDf$x,polyDf$y,col='black',border=NA)
+    #polyDf<-do.call(rbind,lapply(linePos,function(xx){
+        #slope<-c(xx-mainLwdIn/2-topHole[1]+mainLwdIn/2,lineTop-topHole[2]+holeDiameter/2.1)
+        #perp<-rev(slope)*c(1,-1)
+        #offset<--perp/sqrt(sum(perp^2))*mainLwdIn
+        #data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,topHole[1]+offset[1],topHole[1]+mainLwdIn/2,NA),'y'=c(lineTop,lineTop,topHole[2]+holeDiameter/2.1+offset[2],topHole[2]+holeDiameter/2.1,NA))
+    #}))
+    #polygon(polyDf$x,polyDf$y,col='black',border=NA)
+    polygon(c(topHole[1],max(linePos)+mainLwdIn/2,min(linePos)-mainLwdIn/2),c(topHole[2]+holeDiameter/2,lineTop,lineTop),col='black',border=NA)
     #bottom connectors
-    polyDf<-do.call(rbind,lapply(linePos,function(xx){
-        slope<-c(bottomHole[1]+mainLwdIn/2-xx-mainLwdIn/2,bottomHole[2]-holeDiameter/2.1-lineBottom)
-        perp<-rev(slope)*c(1,-1)
-        offset<--perp/sqrt(sum(perp^2))*mainLwdIn
-        data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,bottomHole[1]+offset[1],bottomHole[1]+mainLwdIn/2,NA),'y'=c(lineBottom,lineBottom,bottomHole[2]-holeDiameter/2.1+offset[2],bottomHole[2]-holeDiameter/2.1,NA))
-    }))
+    #polyDf<-do.call(rbind,lapply(linePos,function(xx){
+        #slope<-c(bottomHole[1]+mainLwdIn/2-xx-mainLwdIn/2,bottomHole[2]-holeDiameter/2.1-lineBottom)
+        #perp<-rev(slope)*c(1,-1)
+        #offset<--perp/sqrt(sum(perp^2))*mainLwdIn
+        #data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,bottomHole[1]+offset[1],bottomHole[1]+mainLwdIn/2,NA),'y'=c(lineBottom,lineBottom,bottomHole[2]-holeDiameter/2.1+offset[2],bottomHole[2]-holeDiameter/2.1,NA))
+    #}))
     #polyDf<-do.call(rbind,lapply(linePos,function(xx)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,bottomHole[1]+mainLwdIn/2,bottomHole[1]-mainLwdIn/2,NA),'y'=c(lineBottom,lineBottom,bottomHole[2]-holeDiameter/2.1,bottomHole[2]-holeDiameter/2.1,NA))))
-    polygon(polyDf$x,polyDf$y,col='black',border=NA)
+    #polygon(polyDf$x,polyDf$y,col='black',border=NA)
+    polygon(c(bottomHole[1],max(linePos)+mainLwdIn/2,min(linePos)-mainLwdIn/2),c(bottomHole[2]-holeDiameter/2,lineBottom,lineBottom),col='black',border=NA)
   dev.off()
 }
 plotLith()
