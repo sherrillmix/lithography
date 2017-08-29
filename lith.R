@@ -1,10 +1,10 @@
-plotLith<-function(file='lith.pdf',width=1,height=1,buffer=.05,holeDiameter=.1,nLine=70,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3){
+mi2in<-3.93701e-5
+plotLith<-function(width=1,height=1,buffer=.05,holeDiameter=.1,nLine=200,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3){
   #convert microns to inches
-  mi2in<-3.93701e-5
   mainLwdIn<-mainLwd*mi2in
   constrictWidthIn<-constrictWidth*mi2in
   #cairo_pdf to avoid resolution issues
-  cairo_pdf(file,width=width/mi2in/90,height=height/mi2in/90)
+  #cairo_pdf(file,width=width/mi2in/90,height=height/mi2in/90)
     #no margins
     par(mar=c(0,0,0,0))
     #empty plot
@@ -32,10 +32,10 @@ plotLith<-function(file='lith.pdf',width=1,height=1,buffer=.05,holeDiameter=.1,n
     #just extend whole way to reduce connection problems
     rect(linePos-constrictWidthIn/2,lineMid,linePos+constrictWidthIn/2,constrictBottom,col='black',border=NA)
     #top ramp
-    polyDf<-do.call(rbind,lapply(linePos,function(xx)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,xx+constrictWidthIn/2,xx-constrictWidthIn/2,NA),'y'=c(constrictBottom,constrictBottom,bottomRampTop,bottomRampTop,NA))))
+    polyDf<-do.call(rbind,mapply(function(xx,yy)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,xx+yy/2,xx-yy/2,NA),'y'=c(constrictBottom,constrictBottom,bottomRampTop,bottomRampTop,NA)),linePos,constrictWidthIn,SIMPLIFY=FALSE))
     polygon(polyDf$x,polyDf$y,col='black',border=NA)
     #bottom ramp
-    polyDf<-do.call(rbind,lapply(linePos,function(xx)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,xx+constrictWidthIn/2,xx-constrictWidthIn/2,NA),'y'=c(lineMid,lineMid,topRampBottom,topRampBottom,NA))))
+    polyDf<-do.call(rbind,mapply(function(xx,yy)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,xx+yy/2,xx-yy/2,NA),'y'=c(lineMid,lineMid,topRampBottom,topRampBottom,NA)),linePos,constrictWidthIn,SIMPLIFY=FALSE))
     polygon(polyDf$x,polyDf$y,col='black',border=NA)
     #top connectors
     #polyDf<-do.call(rbind,lapply(linePos,function(xx){
@@ -56,7 +56,19 @@ plotLith<-function(file='lith.pdf',width=1,height=1,buffer=.05,holeDiameter=.1,n
     #polyDf<-do.call(rbind,lapply(linePos,function(xx)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,bottomHole[1]+mainLwdIn/2,bottomHole[1]-mainLwdIn/2,NA),'y'=c(lineBottom,lineBottom,bottomHole[2]-holeDiameter/2.1,bottomHole[2]-holeDiameter/2.1,NA))))
     #polygon(polyDf$x,polyDf$y,col='black',border=NA)
     polygon(c(bottomHole[1],max(linePos)+mainLwdIn/2,min(linePos)-mainLwdIn/2),c(bottomHole[2]-holeDiameter/2,lineBottom,lineBottom),col='black',border=NA)
-  dev.off()
+  #dev.off()
 }
 #open in inkscape and save with base unit px
-plotLith()
+#cairo_pdf('lithMulti.pdf',width=3/mi2in/90,height=3/mi2in/90)
+
+#save as dxf 12 scale by 100x
+cairo_pdf('lithMulti.pdf',width=3/mi2in/100,height=3/mi2in/100)
+  layout(matrix(c(0,1,1,2,2,0,3,3,4,4,5,5,0,6,6,7,7,0),ncol=3))
+  plotLith(constrictWidth=2)
+  plotLith(constrictWidth=4)
+  plotLith(constrictWidth=6)
+  plotLith(constrictWidth=8)
+  plotLith(constrictWidth=12)
+  plotLith(constrictWidth=15,mainLwd=40)
+  plotLith(constrictWidth=seq(1,30,length.out=200),nLine=200)
+dev.off()
