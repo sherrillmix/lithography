@@ -1,5 +1,6 @@
+library(showtext)
 mi2in<-3.93701e-5
-plotLith<-function(width=1,height=1,buffer=.05,holeDiameter=.1,nLine=200,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3){
+plotLith<-function(width=1,height=1,buffer=.05,holeDiameter=.1,nLine=200,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3,title='',titleCex=100){
   #convert microns to inches
   mainLwdIn<-mainLwd*mi2in
   constrictWidthIn<-constrictWidth*mi2in
@@ -56,6 +57,12 @@ plotLith<-function(width=1,height=1,buffer=.05,holeDiameter=.1,nLine=200,mainLwd
     #polyDf<-do.call(rbind,lapply(linePos,function(xx)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,bottomHole[1]+mainLwdIn/2,bottomHole[1]-mainLwdIn/2,NA),'y'=c(lineBottom,lineBottom,bottomHole[2]-holeDiameter/2.1,bottomHole[2]-holeDiameter/2.1,NA))))
     #polygon(polyDf$x,polyDf$y,col='black',border=NA)
     polygon(c(bottomHole[1],max(linePos)+mainLwdIn/2,min(linePos)-mainLwdIn/2),c(bottomHole[2]-holeDiameter/2,lineBottom,lineBottom),col='black',border=NA)
+    if(title!=''){
+      showtext.begin()
+      text(rep(c(topHole[1],bottomHole[1]),each=2)*c(.5,1.5),rep(c(topHole[2],bottomHole[2]),each=2),title,cex=titleCex,font=2)
+      showtext.end()
+    }
+    return(invisible(list('lines'=linePos,'mid'=lineMid,'top'=topHole,'bottom'=bottomHole)))
   #dev.off()
 }
 #open in inkscape and save with base unit px
@@ -64,11 +71,13 @@ plotLith<-function(width=1,height=1,buffer=.05,holeDiameter=.1,nLine=200,mainLwd
 #save as dxf 12 scale by 100x
 cairo_pdf('lithMulti.pdf',width=3/mi2in/100,height=3/mi2in/100)
   layout(matrix(c(0,1,1,2,2,0,3,3,4,4,5,5,0,6,6,7,7,0),ncol=3))
-  plotLith(constrictWidth=2)
-  plotLith(constrictWidth=4)
-  plotLith(constrictWidth=6)
-  plotLith(constrictWidth=8)
-  plotLith(constrictWidth=12)
-  plotLith(constrictWidth=15,mainLwd=40)
-  plotLith(constrictWidth=seq(1,30,length.out=200),nLine=200)
+  plotLith(constrictWidth=2,title="2um")
+  plotLith(constrictWidth=3,title="3um")
+  plotLith(constrictWidth=4,title="4um")
+  plotLith(constrictWidth=5,title="5um")
+  plotLith(constrictWidth=6,title="6um")
+  plotLith(constrictWidth=9,title="9um")
+  widths<-seq(1,30,.25)
+  coords<-plotLith(constrictWidth=widths,nLine=length(widths),title='Mixed')
+  text(coords[['lines']]+min(diff(coords[['lines']]))*.5,coords[['mid']],as.character(widths),cex=10,srt=90,font=2)
 dev.off()
