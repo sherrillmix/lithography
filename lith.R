@@ -1,6 +1,6 @@
 library(showtext)
 mi2in<-3.93701e-5
-plotLith<-function(width=1,height=1,buffer=.05,holeDiameter=.1,nLine=200,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3,title='',titleCex=100){
+plotLith<-function(width=1.1,height=1.1,buffer=.1,holeDiameter=.1,nLine=200,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3,title='',titleCex=100){
   #convert microns to inches
   mainLwdIn<-mainLwd*mi2in
   constrictWidthIn<-constrictWidth*mi2in
@@ -33,10 +33,10 @@ plotLith<-function(width=1,height=1,buffer=.05,holeDiameter=.1,nLine=200,mainLwd
     #just extend whole way to reduce connection problems
     rect(linePos-constrictWidthIn/2,lineMid,linePos+constrictWidthIn/2,constrictBottom,col='black',border=NA)
     #top ramp
-    polyDf<-do.call(rbind,mapply(function(xx,yy)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,xx+yy/2,xx-yy/2,NA),'y'=c(constrictBottom,constrictBottom,bottomRampTop,bottomRampTop,NA)),linePos,constrictWidthIn,SIMPLIFY=FALSE))
+    polyDf<-do.call(rbind,mapply(function(xx,yy,lineWidth)data.frame('x'=c(xx-lineWidth/2,xx+lineWidth/2,xx+yy/2,xx-yy/2,NA),'y'=c(constrictBottom,constrictBottom,bottomRampTop,bottomRampTop,NA)),linePos,constrictWidthIn,mainLwdIn,SIMPLIFY=FALSE))
     polygon(polyDf$x,polyDf$y,col='black',border=NA)
     #bottom ramp
-    polyDf<-do.call(rbind,mapply(function(xx,yy)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,xx+yy/2,xx-yy/2,NA),'y'=c(lineMid,lineMid,topRampBottom,topRampBottom,NA)),linePos,constrictWidthIn,SIMPLIFY=FALSE))
+    polyDf<-do.call(rbind,mapply(function(xx,yy,lineWidth)data.frame('x'=c(xx-lineWidth/2,xx+lineWidth/2,xx+yy/2,xx-yy/2,NA),'y'=c(lineMid,lineMid,topRampBottom,topRampBottom,NA)),linePos,constrictWidthIn,mainLwdIn,SIMPLIFY=FALSE))
     polygon(polyDf$x,polyDf$y,col='black',border=NA)
     #top connectors
     #polyDf<-do.call(rbind,lapply(linePos,function(xx){
@@ -46,7 +46,7 @@ plotLith<-function(width=1,height=1,buffer=.05,holeDiameter=.1,nLine=200,mainLwd
         #data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,topHole[1]+offset[1],topHole[1]+mainLwdIn/2,NA),'y'=c(lineTop,lineTop,topHole[2]+holeDiameter/2.1+offset[2],topHole[2]+holeDiameter/2.1,NA))
     #}))
     #polygon(polyDf$x,polyDf$y,col='black',border=NA)
-    polygon(c(topHole[1],max(linePos)+mainLwdIn/2,min(linePos)-mainLwdIn/2),c(topHole[2]+holeDiameter/2,lineTop,lineTop),col='black',border=NA)
+    polygon(c(topHole[1],max(linePos)+max(mainLwdIn,na.rm=TRUE)/2,min(linePos)-max(mainLwdIn,na.rm=TRUE)/2),c(topHole[2]+holeDiameter/2,lineTop,lineTop),col='black',border=NA)
     #bottom connectors
     #polyDf<-do.call(rbind,lapply(linePos,function(xx){
         #slope<-c(bottomHole[1]+mainLwdIn/2-xx-mainLwdIn/2,bottomHole[2]-holeDiameter/2.1-lineBottom)
@@ -56,7 +56,7 @@ plotLith<-function(width=1,height=1,buffer=.05,holeDiameter=.1,nLine=200,mainLwd
     #}))
     #polyDf<-do.call(rbind,lapply(linePos,function(xx)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,bottomHole[1]+mainLwdIn/2,bottomHole[1]-mainLwdIn/2,NA),'y'=c(lineBottom,lineBottom,bottomHole[2]-holeDiameter/2.1,bottomHole[2]-holeDiameter/2.1,NA))))
     #polygon(polyDf$x,polyDf$y,col='black',border=NA)
-    polygon(c(bottomHole[1],max(linePos)+mainLwdIn/2,min(linePos)-mainLwdIn/2),c(bottomHole[2]-holeDiameter/2,lineBottom,lineBottom),col='black',border=NA)
+    polygon(c(bottomHole[1],max(linePos)+max(mainLwdIn,na.rm=TRUE)/2,min(linePos)-max(mainLwdIn,na.rm=TRUE)/2),c(bottomHole[2]-holeDiameter/2,lineBottom,lineBottom),col='black',border=NA)
     if(title!=''){
       showtext.begin()
       text(rep(c(topHole[1],bottomHole[1]),each=2)*c(.5,1.5),rep(c(topHole[2],bottomHole[2]),each=2),title,cex=titleCex,font=2)
@@ -68,6 +68,14 @@ plotLith<-function(width=1,height=1,buffer=.05,holeDiameter=.1,nLine=200,mainLwd
 #open in inkscape and save with base unit px
 #cairo_pdf('lithMulti.pdf',width=3/mi2in/90,height=3/mi2in/90)
 
+interleave<-function(xx,yy){
+  n<-max(length(xx),length(yy))
+  out<-2*n
+  out[(1:n)*2-1]<-xx
+  out[(1:n)*2]<-yy
+  return(out)
+}
+
 #save as dxf 12 scale by 100x
 cairo_pdf('lithMulti.pdf',width=3/mi2in/100,height=3/mi2in/100)
   layout(matrix(c(0,1,1,2,2,0,3,3,4,4,5,5,0,6,6,7,7,0),ncol=3))
@@ -77,7 +85,19 @@ cairo_pdf('lithMulti.pdf',width=3/mi2in/100,height=3/mi2in/100)
   plotLith(constrictWidth=5,title="5um")
   plotLith(constrictWidth=6,title="6um")
   plotLith(constrictWidth=9,title="9um")
-  widths<-seq(1,30,.25)
-  coords<-plotLith(constrictWidth=widths,nLine=length(widths),title='Mixed')
-  text(coords[['lines']]+min(diff(coords[['lines']]))*.5,coords[['mid']],as.character(widths),cex=10,srt=90,font=2)
+  testWidths<-seq(1,30,.25)
+  widths<-rep(interleave(testWidths,NA),rep(c(2,1),length(testWidths)))
+  coords<-plotLith(constrictWidth=widths,nLine=length(widths),mainLwd=30*widths/widths,title='Mixed')
+  text(coords[['lines']]+min(diff(coords[['lines']]))*.5,ifelse(rep(1:(length(widths)/length(testWidths)),length.out=length(testWidths))==5,coords[['mid']],NA),as.character(widths),cex=10,srt=90,font=2)
 dev.off()
+
+
+spiralCoords<-function(x1,y1,x2,y2,rotations=3,nv=100){
+  angles<-seq(0,2*pi*rotations,length.out=nv)
+  print(angles)
+  radius<-seq(0,1,length.out=nv)
+  x<-cos(angles)*radius
+  y<-sin(angles)*radius
+  plot(x,y)
+}
+spiralCoords(1,1,2,2)
