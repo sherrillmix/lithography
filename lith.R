@@ -92,12 +92,50 @@ cairo_pdf('lithMulti.pdf',width=3/mi2in/100,height=3/mi2in/100)
 dev.off()
 
 
-spiralCoords<-function(x1,y1,x2,y2,rotations=3,nv=100){
-  angles<-seq(0,2*pi*rotations,length.out=nv)
-  print(angles)
-  radius<-seq(0,1,length.out=nv)
-  x<-cos(angles)*radius
-  y<-sin(angles)*radius
-  plot(x,y)
+spiralCoords<-function(x1,y1,x2,y2,rotations=1,nv=100,width=.01){
+  start<-atan2(y1-y2,x1-x2)
+  startRadius<-sqrt((x1-x2)^2+(y1-y2)^2)
+  angles<-seq(start,start+2*pi*rotations,length.out=nv)
+  radius<-seq(startRadius,0,length.out=nv)
+  xs<-x2+cos(angles)*radius
+  ys<-y2+sin(angles)*radius
+  xs2<-x2+cos(angles)*(width+radius)
+  ys2<-y2+sin(angles)*(width+radius)
+  #plot(x,y)
+  #points(x1,y1,col='red',cex=2)
+  #points(x2,y2,col='blue',cex=2)
+  return(data.frame('x'=xs,'y'=ys,'angle'=angles))
 }
-spiralCoords(1,1,2,2)
+
+doubleSpiral<-function(x1,y1,x2,y2,width,weights=c(.5,.5),...){
+  midX<-(x1*weights+x2*rev(weights))
+  midY<-(y1*weights+y2*rev(weights))
+  inSpiral<-spiralCoords(x1,y1,midX[2],midY[2],width=width,...)
+  outSpiral<-spiralCoords(x2,y2,midX[1],midY[1],width=-width,...)
+  outSpiral<-outSpiral[nrow(outSpiral):1,]
+  browser()
+  rbind(inSpiral,outSpiral)
+}
+#spi<-doubleSpiral(1,1,2,2,rotations=1,nv=500,width=-.1)
+#plot(spi[,1:2],type='l')
+#lines(spi[,3:4],col='red')
+
+#points(doubleSpiral(1.01,1,2.01,2,rotations=1.5),col='red')
+#zz<-spiralCoords(1,1,2,2,rotations=2,width=.2,nv=4000)
+#plot(zz[,1],zz[,2],type='l')
+#lines(zz[,3],zz[,4])
+
+
+spiral<-function(a,b,rotations=1,nv=500,width=.1){
+  theta<-seq(0,2*pi*rotations,length.out=nv)
+  r=a+b*theta 
+  xs<-cos(theta)*r
+  ys<-sin(theta)*r
+  tangent<-(b*tan(theta)+(a+b*theta))/(b-(a+b*theta)*tan(theta))
+  div<-sqrt(tangent^2+1)
+  dx=b*cos(theta)-(a+b*theta)*sin(theta)
+  dy=b*sin(theta)+(a+b*theta)*cos(theta)
+  offset<-cbind(1/div*sign(dx),tangent/div*sign(dx))
+  return(data.frame(x=xs,y=ys,x2s=xs+-offset[,2]*width,y2s=ys+offset[,1]*width,theta,tangent,dx,dy))
+}
+
