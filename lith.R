@@ -99,7 +99,7 @@ spiralCoords<-function(x1,y1,x2,y2,rotations=1,nv=100,width=.01){
   radius<-seq(startRadius,0,length.out=nv)
   xs<-x2+cos(angles)*radius
   ys<-y2+sin(angles)*radius
-  xs2<-x2+cos(angles)*(width+radius)
+j xs2<-x2+cos(angles)*(width+radius)
   ys2<-y2+sin(angles)*(width+radius)
   #plot(x,y)
   #points(x1,y1,col='red',cex=2)
@@ -126,16 +126,50 @@ doubleSpiral<-function(x1,y1,x2,y2,width,weights=c(.5,.5),...){
 #lines(zz[,3],zz[,4])
 
 
-spiral<-function(a,b,rotations=1,nv=500,width=.1){
-  theta<-seq(0,2*pi*rotations,length.out=nv)
-  r=a+b*theta 
+spiral<-function(a,b,rotations=1,nv=500,width=.1,start=0){
+  theta<-seq(start,start+2*pi*rotations,length.out=nv)
+  r=a+b*(theta-start)
   xs<-cos(theta)*r
   ys<-sin(theta)*r
-  tangent<-(b*tan(theta)+(a+b*theta))/(b-(a+b*theta)*tan(theta))
-  div<-sqrt(tangent^2+1)
-  dx=b*cos(theta)-(a+b*theta)*sin(theta)
-  dy=b*sin(theta)+(a+b*theta)*cos(theta)
-  offset<-cbind(1/div*sign(dx),tangent/div*sign(dx))
-  return(data.frame(x=xs,y=ys,x2s=xs+-offset[,2]*width,y2s=ys+offset[,1]*width,theta,tangent,dx,dy))
+  #tangent<-(b*tan(theta)+(a+b*theta))/(b-(a+b*theta)*tan(theta))
+  #div<-sqrt(tangent^2+1)
+  dx=b*cos(theta)-(a+b*(theta-start))*sin(theta)
+  dy=b*sin(theta)+(a+b*(theta-start))*cos(theta)
+  div<-sqrt(dx^2+dy^2)
+  offset<-cbind(dx/div,dy/div)
+  #offset<-cbind(1/div*sign(dx),tangent/div*sign(dx))
+  return(data.frame(x=xs,y=ys,x2s=xs+-offset[,2]*width,y2s=ys+offset[,1]*width,theta,dx,dy))
 }
 
+doubleSpiral<-function(x1,y1,x2,y2,width,rotations=1,...){
+  midX<-(x1+x2)/2
+  midY<-(y1+y2)/2
+  #rbind(inSpiral,outSpiral)
+  startAngle<-atan2(y1-y2,x1-x2)
+  a<-0
+  b<-sqrt((x1-x2)^2+(y1-y2)^2)/rotations/2/pi/2
+  print(b)
+  inSpiral<-spiral(0,b,width=width,rotations=rotations,start=startAngle,...)
+  inSpiral[,c(1,3)]<-inSpiral[,c(1,3)]+midX
+  inSpiral[,c(2,4)]<-inSpiral[,c(2,4)]+midY
+  outSpiral<-spiral(0,-b,width=-width,rotations=rotations,start=startAngle,...)
+  outSpiral[,c(1,3)]<-outSpiral[,c(1,3)]+midX
+  outSpiral[,c(2,4)]<-outSpiral[,c(2,4)]+midY
+  inSpiral<-inSpiral[nrow(outSpiral):1,]
+  return(rbind(inSpiral,outSpiral))
+}
+
+spiralIntegral<-function(a,b,theta,theta0=0){
+  sqrt((a+b*(theta-theta0))^2+b^2)*(a+b*(theta-theta0))/b/2+b/2*log(sqrt((a+b*(theta-theta0))^2+b^2)+a+b*(theta-theta0))
+}
+spiralLength<-function(a,b,theta2,theta1=0,theta0=0){
+  spiralIntegral(a,b,theta2,theta0)-spiralIntegral(a,b,theta1,theta0)
+}
+findSpacingDouble<-function(length,rotations){
+  b<-optim(list(b=1),function(b)abs(length-spiralLength(0,b,rotations*2*pi)/2),method='Brent',lower=0,upper=10000)$par
+  spacing<-b*2*pi*rotations
+  return(spacing)
+}
+
+zz<-spiral(0,20/2/pi/2,2,width=.8);plot(zz[,1:2],type='l');lines(zz[,3:4]);points(0,0)
+zz2<-spiral(0,-20/2/pi/2,2,width=-.8);lines(zz2[,1:2],col='red');lines(zz2[,3:4],col='red')
