@@ -1,6 +1,6 @@
 library(showtext)
 mi2in<-3.93701e-5
-plotLith<-function(width=1.1,height=1.1,buffer=.1,holeDiameter=.1,nLine=200,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3,title='',titleCex=100){
+plotLith<-function(width=1.2,height=1.2,buffer=.15,holeDiameter=.1,nLine=200,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3,title='',titleCex=100){
   #convert microns to inches
   mainLwdIn<-mainLwd*mi2in
   constrictWidthIn<-constrictWidth*mi2in
@@ -38,30 +38,21 @@ plotLith<-function(width=1.1,height=1.1,buffer=.1,holeDiameter=.1,nLine=200,main
     #bottom ramp
     polyDf<-do.call(rbind,mapply(function(xx,yy,lineWidth)data.frame('x'=c(xx-lineWidth/2,xx+lineWidth/2,xx+yy/2,xx-yy/2,NA),'y'=c(lineMid,lineMid,topRampBottom,topRampBottom,NA)),linePos,constrictWidthIn,mainLwdIn,SIMPLIFY=FALSE))
     polygon(polyDf$x,polyDf$y,col='black',border=NA)
-    #top connectors
-    #polyDf<-do.call(rbind,lapply(linePos,function(xx){
-        #slope<-c(xx-mainLwdIn/2-topHole[1]+mainLwdIn/2,lineTop-topHole[2]+holeDiameter/2.1)
-        #perp<-rev(slope)*c(1,-1)
-        #offset<--perp/sqrt(sum(perp^2))*mainLwdIn
-        #data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,topHole[1]+offset[1],topHole[1]+mainLwdIn/2,NA),'y'=c(lineTop,lineTop,topHole[2]+holeDiameter/2.1+offset[2],topHole[2]+holeDiameter/2.1,NA))
-    #}))
-    #polygon(polyDf$x,polyDf$y,col='black',border=NA)
-    polygon(c(topHole[1],max(linePos)+max(mainLwdIn,na.rm=TRUE)/2,min(linePos)-max(mainLwdIn,na.rm=TRUE)/2),c(topHole[2]+holeDiameter/2,lineTop,lineTop),col='black',border=NA)
-    #bottom connectors
-    #polyDf<-do.call(rbind,lapply(linePos,function(xx){
-        #slope<-c(bottomHole[1]+mainLwdIn/2-xx-mainLwdIn/2,bottomHole[2]-holeDiameter/2.1-lineBottom)
-        #perp<-rev(slope)*c(1,-1)
-        #offset<--perp/sqrt(sum(perp^2))*mainLwdIn
-        #data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,bottomHole[1]+offset[1],bottomHole[1]+mainLwdIn/2,NA),'y'=c(lineBottom,lineBottom,bottomHole[2]-holeDiameter/2.1+offset[2],bottomHole[2]-holeDiameter/2.1,NA))
-    #}))
-    #polyDf<-do.call(rbind,lapply(linePos,function(xx)data.frame('x'=c(xx-mainLwdIn/2,xx+mainLwdIn/2,bottomHole[1]+mainLwdIn/2,bottomHole[1]-mainLwdIn/2,NA),'y'=c(lineBottom,lineBottom,bottomHole[2]-holeDiameter/2.1,bottomHole[2]-holeDiameter/2.1,NA))))
-    #polygon(polyDf$x,polyDf$y,col='black',border=NA)
-    polygon(c(bottomHole[1],max(linePos)+max(mainLwdIn,na.rm=TRUE)/2,min(linePos)-max(mainLwdIn,na.rm=TRUE)/2),c(bottomHole[2]-holeDiameter/2,lineBottom,lineBottom),col='black',border=NA)
+    #triangles
+    maxLeft<-max(linePos)+max(mainLwdIn,na.rm=TRUE)/2
+    maxRight<-min(linePos)-max(mainLwdIn,na.rm=TRUE)/2
+    polygon(c(topHole[1],maxLeft,maxRight),c(topHole[2]+holeDiameter/2,lineTop,lineTop),col='black',border=NA)
+    polygon(c(bottomHole[1],maxLeft,maxRight),c(bottomHole[2]-holeDiameter/2,lineBottom,lineBottom),col='black',border=NA)
+    #rectangles above/below triangles
+    rect(maxLeft,lineTop+max(mainLwdIn,na.rm=TRUE)/10,maxRight,lineTop-max(mainLwdIn,na.rm=TRUE)*3,col='black',border=NA)
+    rect(maxLeft,lineBottom-max(mainLwdIn,na.rm=TRUE)/10,maxRight,lineBottom+max(mainLwdIn,na.rm=TRUE)*3,col='black',border=NA)
     if(title!=''){
       showtext.begin()
       text(rep(c(topHole[1],bottomHole[1]),each=2)*c(.5,1.5),rep(c(topHole[2],bottomHole[2]),each=2),title,cex=titleCex,font=2)
       showtext.end()
     }
+    #box
+    rect(c(0,0,0,width),c(0,0,height,0),c(0+buffer/10,width,width,width-buffer/10),c(height,0+buffer/10,height-buffer/10,height),col='black',border=NA)
     return(invisible(list('lines'=linePos,'mid'=lineMid,'top'=topHole,'bottom'=bottomHole)))
   #dev.off()
 }
@@ -88,7 +79,9 @@ cairo_pdf('lithMulti.pdf',width=3/mi2in/100,height=3/mi2in/100)
   testWidths<-seq(1,30,.25)
   widths<-rep(interleave(testWidths,NA),rep(c(2,1),length(testWidths)))
   coords<-plotLith(constrictWidth=widths,nLine=length(widths),mainLwd=30*widths/widths,title='Mixed')
-  text(coords[['lines']]+min(diff(coords[['lines']]))*.5,ifelse(rep(1:(length(widths)/length(testWidths)),length.out=length(testWidths))==5,coords[['mid']],NA),as.character(widths),cex=10,srt=90,font=2)
+  showtext.begin()
+  text(coords[['lines']]+min(diff(coords[['lines']],na.rm=TRUE))*.05,ifelse(rep(1:(length(widths)/length(testWidths)),length.out=length(testWidths))==(length(widths)/length(testWidths)),coords[['mid']],NA),c(NA,as.character(widths)[-length(widths)]),cex=7,srt=90,font=2,adj=c(1,.5))
+  showtext.end()
 dev.off()
 
 
