@@ -1,3 +1,4 @@
+source('functions.R')
 
 #open in inkscape and save with base unit px
 #cairo_pdf('lithMulti.pdf',width=3/mi2in/90,height=3/mi2in/90)
@@ -20,16 +21,28 @@ cairo_pdf('lithMulti.pdf',width=3*dim/mi2in/100,height=3*dim/mi2in/100)
   showtext.end()
 dev.off()
 
+pdf('spiral35_5000.pdf',width=.1/mi2in/100,height=.5/mi2in/100)
+spiralLith(nRot=2,narrowWidth=35,wideWidth=500,narrowLength=5000,width=.1,height=.5,wideLength=3000)
+dev.off()
 
+pdf('spiral140_5000.pdf',width=.2/mi2in/100,height=.9/mi2in/100)
+spiralLith(nRot=1,narrowWidth=140,wideWidth=2000,narrowLength=5000,wideLength=5000,width=.2,height=.9)
+dev.off()
+
+pdf('spiral140_10000.pdf',width=.2/mi2in/100,height=.9/mi2in/100)
+spiralLith(nRot=2,narrowWidth=140,wideWidth=2000,narrowLength=10000,wideLength=5000,width=.2,height=.9)
+dev.off()
 
 nRot<-1.4
 offset<-findSpacingDouble(10000,nRot)
 pdf('test.pdf')
-zz<-doubleSpiral(0,0,offset,0,width=30,rotations=nRot)
-plot(zz[,1:2],type='l')
-lines(zz[,3:4],col='red')
+  zz<-doubleSpiral(0,0,offset,0,width=30,rotations=nRot)
+  plot(zz[,1:2],type='l')
+  lines(zz[,3:4],col='red')
 #points(zz[,3:4])
 dev.off()
+
+
 
 
 zz<-spiral(10,20/2/pi/2,2,width=.8);plot(zz[,1:2],type='l');lines(zz[,3:4]);points(0,0)

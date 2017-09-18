@@ -1,6 +1,6 @@
 library(showtext)
 mi2in<-3.93701e-5
-plotLith<-function(width=1.1,height=1.1,buffer=.15,holeDiameter=.1,nLine=200,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3,title='',titleCex=100){
+plotLith<-function(width=1,height=1,buffer=.15,holeDiameter=.1,nLine=200,mainLwd=30,constrictWidth=2,constrictLength=30,constrictRamp=constrictLength*3,title='',titleCex=100){
   #convert microns to inches
   mainLwdIn<-mainLwd*mi2in
   constrictWidthIn<-constrictWidth*mi2in
@@ -57,6 +57,40 @@ plotLith<-function(width=1.1,height=1.1,buffer=.15,holeDiameter=.1,nLine=200,mai
   #dev.off()
 }
 
+spiralLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth*2,yBase=.5,angle=0,narrowWidth=40,narrowLength=5000,wideWidth=800,wideLength=5000,rampLength=200,nRot=2){ 
+  wideWidthIn<-wideWidth*mi2in
+  narrowWidthIn<-narrowWidth*mi2in
+  wideLengthIn<-wideLength*mi2in
+  narrowLengthIn<-narrowLength*mi2in
+  rampLengthIn<-rampLength*mi2in
+  holeDiameterIn<-holeDiameter*mi2in
+  offset<-findSpacingDouble(narrowLength,nRot)*mi2in
+  #empty plot
+  par(mar=c(0,0,0,0))
+  plot(1,1,type='n',xlab='',ylab='',ylim=c(0,height),xlim=c(0,width),bty='n',xaxt='n',yaxt='n',xaxs='i',yaxs='i')
+  #hole positions
+  bottomHole<-c(width/2,buffer+holeDiameterIn/2)
+  topHole<-c(width/2,bottomHole[2]+wideLengthIn*2+offset+2*rampLengthIn)
+  mid<-bottomHole[2]+wideLengthIn+c(0,rampLengthIn*2+offset+narrowWidthIn)
+  #top hole
+  plotrix::draw.circle(topHole[1],topHole[2],radius=holeDiameterIn/2,col='black')
+  #bottom hole
+  plotrix::draw.circle(bottomHole[1],bottomHole[2],radius=holeDiameterIn/2,col='black')
+  #thick rects
+  rect(c(topHole[1]-wideWidthIn/2,bottomHole[1]-wideWidthIn/2),c(topHole[2],bottomHole[2]),c(topHole[1]+wideWidthIn/2,bottomHole[1]+wideWidthIn/2),c(mid[2]-rampLengthIn*.02,mid[1]+rampLengthIn*.02),col='black',border=NA)
+  #top ramp
+  polygon(c(topHole[1]-wideWidthIn/2,topHole[1]+wideWidthIn/2,topHole[1]-narrowWidthIn/2,topHole[1]+narrowWidthIn/2),c(mid[2],mid[2],mid[2]-rampLengthIn,mid[2]-rampLengthIn),col='black',border=NA)
+  #bottom connector
+  rect(topHole[1]+narrowWidthIn/2,mid[2],topHole[1]-narrowWidthIn/2,mid[2]-rampLengthIn-narrowWidthIn,col='black',border=NA)
+  #bottomRamp
+  polygon(c(bottomHole[1]-wideWidthIn/2,bottomHole[1]+wideWidthIn/2,bottomHole[1]-narrowWidthIn/2,bottomHole[1]+narrowWidthIn/2),c(mid[1],mid[1],mid[1]+rampLengthIn,mid[1]+rampLengthIn),col='black',border=NA)
+  #bottom connector
+  rect(bottomHole[1]+narrowWidthIn/2,mid[1],bottomHole[1]-narrowWidthIn/2,mid[1]+rampLengthIn+narrowWidthIn,col='black',border=NA)
+  #spiral
+  spiralCoords<-doubleSpiral(bottomHole[1],mid[1]+rampLengthIn,topHole[1],mid[2]-rampLengthIn-narrowWidthIn,width=narrowWidthIn,rotations=nRot)
+  polygon(c(spiralCoords[,'x'],rev(spiralCoords[,'x2'])),c(spiralCoords[,'y'],rev(spiralCoords[,'y2'])),col='black',border=NA)
+}
+
 interleave<-function(xx,yy){
   n<-max(length(xx),length(yy))
   out<-2*n
@@ -65,39 +99,40 @@ interleave<-function(xx,yy){
   return(out)
 }
 
+if(FALSE){
+  spiralCoords<-function(x1,y1,x2,y2,rotations=1,nv=100,width=.01){
+    start<-atan2(y1-y2,x1-x2)
+    startRadius<-sqrt((x1-x2)^2+(y1-y2)^2)
+    angles<-seq(start,start+2*pi*rotations,length.out=nv)
+    radius<-seq(startRadius,0,length.out=nv)
+    xs<-x2+cos(angles)*radius
+    ys<-y2+sin(angles)*radius
+    xs2<-x2+cos(angles)*(width+radius)
+    ys2<-y2+sin(angles)*(width+radius)
+    #plot(x,y)
+    #points(x1,y1,col='red',cex=2)
+    #points(x2,y2,col='blue',cex=2)
+    return(data.frame('x'=xs,'y'=ys,'angle'=angles))
+  }
 
-spiralCoords<-function(x1,y1,x2,y2,rotations=1,nv=100,width=.01){
-  start<-atan2(y1-y2,x1-x2)
-  startRadius<-sqrt((x1-x2)^2+(y1-y2)^2)
-  angles<-seq(start,start+2*pi*rotations,length.out=nv)
-  radius<-seq(startRadius,0,length.out=nv)
-  xs<-x2+cos(angles)*radius
-  ys<-y2+sin(angles)*radius
-  xs2<-x2+cos(angles)*(width+radius)
-  ys2<-y2+sin(angles)*(width+radius)
-  #plot(x,y)
-  #points(x1,y1,col='red',cex=2)
-  #points(x2,y2,col='blue',cex=2)
-  return(data.frame('x'=xs,'y'=ys,'angle'=angles))
+  doubleSpiral<-function(x1,y1,x2,y2,width,weights=c(.5,.5),...){
+    midX<-(x1*weights+x2*rev(weights))
+    midY<-(y1*weights+y2*rev(weights))
+    inSpiral<-spiralCoords(x1,y1,midX[2],midY[2],width=width,...)
+    outSpiral<-spiralCoords(x2,y2,midX[1],midY[1],width=-width,...)
+    outSpiral<-outSpiral[nrow(outSpiral):1,]
+    rbind(inSpiral,outSpiral)
+  }
+  #spi<-doubleSpiral(1,1,2,2,rotations=1,nv=500,width=-.1)
+  #plot(spi[,1:2],type='l')
+  #lines(spi[,3:4],col='red')
+
+  #points(doubleSpiral(1.01,1,2.01,2,rotations=1.5),col='red')
+  #zz<-spiralCoords(1,1,2,2,rotations=2,width=.2,nv=4000)
+  #plot(zz[,1],zz[,2],type='l')
+  #lines(zz[,3],zz[,4])
+
 }
-
-doubleSpiral<-function(x1,y1,x2,y2,width,weights=c(.5,.5),...){
-  midX<-(x1*weights+x2*rev(weights))
-  midY<-(y1*weights+y2*rev(weights))
-  inSpiral<-spiralCoords(x1,y1,midX[2],midY[2],width=width,...)
-  outSpiral<-spiralCoords(x2,y2,midX[1],midY[1],width=-width,...)
-  outSpiral<-outSpiral[nrow(outSpiral):1,]
-  rbind(inSpiral,outSpiral)
-}
-#spi<-doubleSpiral(1,1,2,2,rotations=1,nv=500,width=-.1)
-#plot(spi[,1:2],type='l')
-#lines(spi[,3:4],col='red')
-
-#points(doubleSpiral(1.01,1,2.01,2,rotations=1.5),col='red')
-#zz<-spiralCoords(1,1,2,2,rotations=2,width=.2,nv=4000)
-#plot(zz[,1],zz[,2],type='l')
-#lines(zz[,3],zz[,4])
-
 
 spiral<-function(a,b,rotations=1,nv=500,width=.1,start=0){
   theta<-seq(start,start+2*pi*rotations,length.out=nv)
@@ -123,8 +158,7 @@ doubleSpiral<-function(x1,y1,x2,y2,width,rotations=1,...){
   startAngle<-atan2(y1-y2,x1-x2)
   a<-0
   b<-sqrt((x1-x2)^2+(y1-y2)^2)/rotations/2/pi/2
-  print(b)
-  nv<-rotations*100
+  nv<-rotations*300
   inSpiral<-spiral(0,b,width=width,rotations=rotations,start=startAngle,nv=nv,...)
   inSpiral[,c(1,3)]<-inSpiral[,c(1,3)]+midX
   inSpiral[,c(2,4)]<-inSpiral[,c(2,4)]+midY
