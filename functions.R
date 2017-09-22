@@ -70,7 +70,7 @@ spiralLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth*2,yBase
   plot(1,1,type='n',xlab='',ylab='',ylim=c(0,height),xlim=c(0,width),bty='n',xaxt='n',yaxt='n',xaxs='i',yaxs='i')
   #hole positions
   bottomHole<-c(width/2,buffer+holeDiameterIn/2)
-  topHole<-c(width/2,bottomHole[2]+wideLengthIn*2+offset+2*rampLengthIn)
+  topHole<-c(width/2,bottomHole[2]+wideLengthIn*2+offset+2*rampLengthIn+narrowWidthIn)
   mid<-bottomHole[2]+wideLengthIn+c(0,rampLengthIn*2+offset+narrowWidthIn)
   #top hole
   plotrix::draw.circle(topHole[1],topHole[2],radius=holeDiameterIn/2,col='black')
@@ -80,7 +80,7 @@ spiralLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth*2,yBase
   rect(c(topHole[1]-wideWidthIn/2,bottomHole[1]-wideWidthIn/2),c(topHole[2],bottomHole[2]),c(topHole[1]+wideWidthIn/2,bottomHole[1]+wideWidthIn/2),c(mid[2]-rampLengthIn*.02,mid[1]+rampLengthIn*.02),col='black',border=NA)
   #top ramp
   polygon(c(topHole[1]-wideWidthIn/2,topHole[1]+wideWidthIn/2,topHole[1]-narrowWidthIn/2,topHole[1]+narrowWidthIn/2),c(mid[2],mid[2],mid[2]-rampLengthIn,mid[2]-rampLengthIn),col='black',border=NA)
-  #bottom connector
+  #top connector
   rect(topHole[1]+narrowWidthIn/2,mid[2],topHole[1]-narrowWidthIn/2,mid[2]-rampLengthIn-narrowWidthIn,col='black',border=NA)
   #bottomRamp
   polygon(c(bottomHole[1]-wideWidthIn/2,bottomHole[1]+wideWidthIn/2,bottomHole[1]-narrowWidthIn/2,bottomHole[1]+narrowWidthIn/2),c(mid[1],mid[1],mid[1]+rampLengthIn,mid[1]+rampLengthIn),col='black',border=NA)
@@ -89,6 +89,34 @@ spiralLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth*2,yBase
   #spiral
   spiralCoords<-doubleSpiral(bottomHole[1],mid[1]+rampLengthIn,topHole[1],mid[2]-rampLengthIn-narrowWidthIn,width=narrowWidthIn,rotations=nRot)
   polygon(c(spiralCoords[,'x'],rev(spiralCoords[,'x2'])),c(spiralCoords[,'y'],rev(spiralCoords[,'y2'])),col='black',border=NA)
+}
+
+constrictLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth*2,yBase=.5,angle=0,narrowWidth=40,narrowLength=5000,wideWidth=800,wideLength=5000,rampLength=200){ 
+  wideWidthIn<-wideWidth*mi2in
+  narrowWidthIn<-narrowWidth*mi2in
+  wideLengthIn<-wideLength*mi2in
+  narrowLengthIn<-narrowLength*mi2in
+  rampLengthIn<-rampLength*mi2in
+  holeDiameterIn<-holeDiameter*mi2in
+  #empty plot
+  par(mar=c(0,0,0,0))
+  plot(1,1,type='n',xlab='',ylab='',ylim=c(0,height),xlim=c(0,width),bty='n',xaxt='n',yaxt='n',xaxs='i',yaxs='i')
+  #hole positions
+  bottomHole<-c(width/2,buffer+holeDiameterIn/2)
+  topHole<-c(width/2,bottomHole[2]+wideLengthIn*2+narrowLengthIn+2*rampLengthIn)
+  mid<-bottomHole[2]+wideLengthIn+c(0,rampLengthIn*2+narrowLengthIn)
+  #top hole
+  plotrix::draw.circle(topHole[1],topHole[2],radius=holeDiameterIn/2,col='black')
+  #bottom hole
+  plotrix::draw.circle(bottomHole[1],bottomHole[2],radius=holeDiameterIn/2,col='black')
+  #thick rects
+  rect(c(topHole[1]-wideWidthIn/2,bottomHole[1]-wideWidthIn/2),c(topHole[2],bottomHole[2]),c(topHole[1]+wideWidthIn/2,bottomHole[1]+wideWidthIn/2),c(mid[2]-rampLengthIn*.02,mid[1]+rampLengthIn*.02),col='black',border=NA)
+  #top ramp
+  polygon(c(topHole[1]-wideWidthIn/2,topHole[1]+wideWidthIn/2,topHole[1]-narrowWidthIn/2,topHole[1]+narrowWidthIn/2),c(mid[2],mid[2],mid[2]-rampLengthIn,mid[2]-rampLengthIn),col='black',border=NA)
+  #bottomRamp
+  polygon(c(bottomHole[1]-wideWidthIn/2,bottomHole[1]+wideWidthIn/2,bottomHole[1]-narrowWidthIn/2,bottomHole[1]+narrowWidthIn/2),c(mid[1],mid[1],mid[1]+rampLengthIn,mid[1]+rampLengthIn),col='black',border=NA)
+  #thin section
+  rect(bottomHole[1]+narrowWidthIn/2,mid[1],bottomHole[1]-narrowWidthIn/2,mid[2],col='black',border=NA)
 }
 
 interleave<-function(xx,yy){
