@@ -57,7 +57,7 @@ plotLith<-function(width=1,height=1,buffer=.15,holeDiameter=.1,nLine=200,mainLwd
   #dev.off()
 }
 
-spiralLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth*2,yBase=.5,angle=0,narrowWidth=40,narrowLength=5000,wideWidth=800,wideLength=5000,rampLength=200,nRot=2){ 
+spiralLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth*2,yBase=.5,angle=0,narrowWidth=40,narrowLength=5000,wideWidth=800,wideLength=5000,rampLength=200,nRot=2,title='',titleCex=20){ 
   wideWidthIn<-wideWidth*mi2in
   narrowWidthIn<-narrowWidth*mi2in
   wideLengthIn<-wideLength*mi2in
@@ -89,9 +89,15 @@ spiralLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth*2,yBase
   #spiral
   spiralCoords<-doubleSpiral(bottomHole[1],mid[1]+rampLengthIn,topHole[1],mid[2]-rampLengthIn-narrowWidthIn,width=narrowWidthIn,rotations=nRot)
   polygon(c(spiralCoords[,'x'],rev(spiralCoords[,'x2'])),c(spiralCoords[,'y'],rev(spiralCoords[,'y2'])),col='black',border=NA)
+  if(title!=''){
+    showtext_begin()
+    text(topHole[1]+-.7*wideWidthIn,topHole[2]+-.95*wideLengthIn,title,cex=titleCex,font=2,srt=90,adj=c(0,0))
+    text(bottomHole[1]+.7*wideWidthIn,bottomHole[2]+.95*wideLengthIn,title,cex=titleCex,font=2,srt=90,adj=c(1,1))
+    showtext_end()
+  }
 }
 
-constrictLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth,yBase=.5,angle=0,narrowWidth=40,narrowLength=5000,wideWidth=800,wideLength=5000,rampLength=200,supportSpacing=1e9,supportWidth=200){ 
+constrictLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth,yBase=.5,angle=0,narrowWidth=40,narrowLength=5000,wideWidth=800,wideLength=5000,rampLength=200,supportSpacing=1e9,supportWidth=200,title='',titleCex=20){ 
   wideWidthIn<-wideWidth*mi2in
   narrowWidthIn<-narrowWidth*mi2in
   wideLengthIn<-wideLength*mi2in
@@ -133,6 +139,12 @@ constrictLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth,yBas
   polygon(c(bottomHole[1]-wideWidthIn/2,bottomHole[1]+wideWidthIn/2,bottomHole[1]-narrowWidthIn/2,bottomHole[1]+narrowWidthIn/2),c(mid[1],mid[1],mid[1]+rampLengthIn,mid[1]+rampLengthIn),col='black',border=NA)
   #thin section
   rect(bottomHole[1]+narrowWidthIn/2,mid[1],bottomHole[1]-narrowWidthIn/2,mid[2],col='black',border=NA)
+  if(title!=''){
+    showtext_begin()
+    text(topHole[1]-.5*wideWidthIn-200*mi2in,topHole[2]+-.95*wideLengthIn,title,cex=titleCex,font=2,srt=90,adj=c(0,0))
+    text(bottomHole[1]+.5*wideWidthIn+200*mi2in,bottomHole[2]+.95*wideLengthIn,title,cex=titleCex,font=2,srt=90,adj=c(1,1))
+    showtext_end()
+  }
 }
 
 interleave<-function(xx,yy){
