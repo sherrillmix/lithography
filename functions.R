@@ -91,13 +91,14 @@ spiralLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth*2,yBase
   polygon(c(spiralCoords[,'x'],rev(spiralCoords[,'x2'])),c(spiralCoords[,'y'],rev(spiralCoords[,'y2'])),col='black',border=NA)
 }
 
-constrictLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth*2,yBase=.5,angle=0,narrowWidth=40,narrowLength=5000,wideWidth=800,wideLength=5000,rampLength=200){ 
+constrictLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth,yBase=.5,angle=0,narrowWidth=40,narrowLength=5000,wideWidth=800,wideLength=5000,rampLength=200,supportSpacing=1e9,supportWidth=200){ 
   wideWidthIn<-wideWidth*mi2in
   narrowWidthIn<-narrowWidth*mi2in
   wideLengthIn<-wideLength*mi2in
   narrowLengthIn<-narrowLength*mi2in
   rampLengthIn<-rampLength*mi2in
   holeDiameterIn<-holeDiameter*mi2in
+  supportSpacingIn<-supportSpacing*mi2in
   #empty plot
   par(mar=c(0,0,0,0))
   plot(1,1,type='n',xlab='',ylab='',ylim=c(0,height),xlim=c(0,width),bty='n',xaxt='n',yaxt='n',xaxs='i',yaxs='i')
@@ -106,11 +107,26 @@ constrictLith<-function(width=.5,height=1,buffer=.05,holeDiameter=wideWidth*2,yB
   topHole<-c(width/2,bottomHole[2]+wideLengthIn*2+narrowLengthIn+2*rampLengthIn)
   mid<-bottomHole[2]+wideLengthIn+c(0,rampLengthIn*2+narrowLengthIn)
   #top hole
-  plotrix::draw.circle(topHole[1],topHole[2],radius=holeDiameterIn/2,col='black')
+  plotrix::draw.ellipse(topHole[1],topHole[2],holeDiameterIn/2,holeDiameterIn/4,segment=c(0,180),col='black')
+  #plotrix::draw.circle(topHole[1],topHole[2],radius=holeDiameterIn/2,col='black')
   #bottom hole
-  plotrix::draw.circle(bottomHole[1],bottomHole[2],radius=holeDiameterIn/2,col='black')
+  #plotrix::draw.circle(bottomHole[1],bottomHole[2],radius=holeDiameterIn/2,col='black')
+  plotrix::draw.ellipse(bottomHole[1],bottomHole[2],holeDiameterIn/2,holeDiameterIn/4,segment=c(180,360),col='black')
   #thick rects
-  rect(c(topHole[1]-wideWidthIn/2,bottomHole[1]-wideWidthIn/2),c(topHole[2],bottomHole[2]),c(topHole[1]+wideWidthIn/2,bottomHole[1]+wideWidthIn/2),c(mid[2]-rampLengthIn*.02,mid[1]+rampLengthIn*.02),col='black',border=NA)
+  if(supportSpacing>wideWidth/2){
+    rect(c(topHole[1]-wideWidthIn/2,bottomHole[1]-wideWidthIn/2),c(topHole[2],bottomHole[2]),c(topHole[1]+wideWidthIn/2,bottomHole[1]+wideWidthIn/2),c(mid[2]-rampLengthIn*.02,mid[1]+rampLengthIn*.02),col='black',border=NA)
+  }else{
+    supportRows<-seq(0,wideWidthIn-supportSpacingIn,supportSpacingIn)
+    supportCols<-seq(0,wideLengthIn-supportSpacingIn,supportSpacingIn)
+    supportLefts<--wideWidthIn/2+supportRows
+    supportRights<--wideWidthIn/2+c(supportRows[-1]-supportWidth*mi2in,wideWidthIn)
+    supportBottoms<-supportCols
+    supportTops<-c(supportCols[-1]-supportWidth*mi2in,wideLengthIn)
+    #full vertical rects
+    rect(c(topHole[1]+supportLefts,bottomHole[1]+supportLefts),rep(c(topHole[2],bottomHole[2]),each=length(supportRows)),c(topHole[1]+supportRights,bottomHole[1]+supportRights),rep(c(mid[2]-rampLengthIn*.02,mid[1]+rampLengthIn*.02),each=length(supportRows)),col='black',border=NA)
+    #full horizontal rects
+    rect(rep(c(topHole[1]-wideWidthIn/2,bottomHole[1]-wideWidthIn/2),each=length(supportCols)),c(topHole[2]-supportBottoms,bottomHole[2]+supportBottoms),rep(c(topHole[1]+wideWidthIn/2,bottomHole[1]+wideWidthIn/2),each=length(supportCols)),c(topHole[2]-supportTops,bottomHole[2]+supportTops),col='black',border=NA)
+  }
   #top ramp
   polygon(c(topHole[1]-wideWidthIn/2,topHole[1]+wideWidthIn/2,topHole[1]-narrowWidthIn/2,topHole[1]+narrowWidthIn/2),c(mid[2],mid[2],mid[2]-rampLengthIn,mid[2]-rampLengthIn),col='black',border=NA)
   #bottomRamp
