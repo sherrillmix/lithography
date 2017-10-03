@@ -47,9 +47,9 @@ plotLith<-function(width=1,height=1,buffer=.15,holeDiameter=.1,nLine=200,mainLwd
     rect(maxLeft,lineTop+max(mainLwdIn,na.rm=TRUE)/10,maxRight,lineTop-max(mainLwdIn,na.rm=TRUE)*3,col='black',border=NA)
     rect(maxLeft,lineBottom-max(mainLwdIn,na.rm=TRUE)/10,maxRight,lineBottom+max(mainLwdIn,na.rm=TRUE)*3,col='black',border=NA)
     if(title!=''){
-      showtext.begin()
+      showtext_begin()
       text(rep(c(topHole[1],bottomHole[1]),each=2)*c(.5,1.5),rep(c(topHole[2],bottomHole[2]),each=2),title,cex=titleCex,font=2)
-      showtext.end()
+      showtext_end()
     }
     #box
     rect(c(0,0,0,width),c(0,0,height,0),c(0+buffer/10,width,width,width-buffer/10),c(height,0+buffer/10,height-buffer/10,height),col='black',border=NA)

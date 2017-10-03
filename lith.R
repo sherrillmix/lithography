@@ -25,6 +25,14 @@ pdf('spiral35_5000.pdf',width=.1/mi2in/100,height=.5/mi2in/100)
 spiralLith(nRot=2,narrowWidth=35,wideWidth=500,narrowLength=5000,width=.1,height=.5,wideLength=3000,holeDiameter=2000)
 dev.off()
 
+pdf('spiral35_10000.pdf',width=.1/mi2in/100,height=.5/mi2in/100)
+spiralLith(nRot=3,narrowWidth=35,wideWidth=500,narrowLength=10000,width=.1,height=.5,wideLength=3000,holeDiameter=2000)
+dev.off()
+
+pdf('spiral50_10000.pdf',width=.1/mi2in/100,height=.5/mi2in/100)
+spiralLith(nRot=3,narrowWidth=50,wideWidth=2000,narrowLength=10000,width=.1,height=.5,wideLength=3000,holeDiameter=2000)
+dev.off()
+
 pdf('spiral140_5000.pdf',width=.2/mi2in/100,height=.9/mi2in/100)
 spiralLith(nRot=1,narrowWidth=140,wideWidth=2000,narrowLength=5000,wideLength=5000,width=.2,height=.9)
 dev.off()
@@ -49,17 +57,10 @@ pdf('constrict5_5_3cm.pdf',width=2/mi2in/100,height=4/mi2in/100)
 constrictLith(narrowWidth=5,wideWidth=30000,narrowLength=5,wideLength=31000,width=2,height=4,holeDiameter=30000,rampLength=500,supportSpacing=2000)
 dev.off()
 
-nRot<-1.4
-offset<-findSpacingDouble(10000,nRot)
-pdf('test.pdf')
-  zz<-doubleSpiral(0,0,offset,0,width=30,rotations=nRot)
-  plot(zz[,1:2],type='l')
-  lines(zz[,3:4],col='red')
-#points(zz[,3:4])
+pdf('constrict5_5_3mm.pdf',width=1/mi2in/100,height=1/mi2in/100)
+constrictLith(narrowWidth=5,wideWidth=3000,narrowLength=5,wideLength=3000,width=1,height=1)
 dev.off()
 
-
-
-
-zz<-spiral(10,20/2/pi/2,2,width=.8);plot(zz[,1:2],type='l');lines(zz[,3:4]);points(0,0)
-zz2<-spiral(0,-20/2/pi/2,2,width=-.8);lines(zz2[,1:2],col='red');lines(zz2[,3:4],col='red')
+pdf('constrict10_10_3mm.pdf',width=1/mi2in/100,height=1/mi2in/100)
+constrictLith(narrowWidth=10,wideWidth=3000,narrowLength=10,wideLength=3000,width=1,height=1)
+dev.off()
