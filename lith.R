@@ -41,8 +41,8 @@ pdf('spiral140_10000.pdf',width=.2/mi2in/100,height=.9/mi2in/100)
 spiralLith(nRot=2,narrowWidth=140,wideWidth=2000,narrowLength=10000,wideLength=5000,width=.2,height=.9,title='140_10000')
 dev.off()
 
-pdf('constrict5_5_1mm.pdf',width=1/mi2in/100,height=1/mi2in/100)
-constrictLith(narrowWidth=5,wideWidth=1000,narrowLength=5,wideLength=3000,width=.5,height=1,title='5_5_1mm')
+pdf('constrict5_5_1mm.pdf',width=.5/mi2in/100,height=.5/mi2in/100)
+constrictLith(narrowWidth=5,wideWidth=1000,narrowLength=5,wideLength=3000,width=.5,height=.5,title='5_5_1mm')
 dev.off()
 
 pdf('constrict5_10_1mm.pdf',width=2/mi2in/100,height=2/mi2in/100)
